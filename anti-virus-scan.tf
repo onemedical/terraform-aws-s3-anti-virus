@@ -2,6 +2,10 @@
 # Lambda Function: Anti-Virus Scanning
 #
 
+locals {
+  sns_arns = compact([var.av_scan_start_sns_arn, var.av_status_sns_arn])
+}
+
 #
 # IAM
 #
@@ -46,6 +50,7 @@ data "aws_iam_policy_document" "main_scan" {
       "s3:GetObjectVersion",
       "s3:PutObjectTagging",
       "s3:PutObjectVersionTagging",
+      "s3:DeleteObject",
     ]
 
     resources = formatlist("%s/*", data.aws_s3_bucket.main_scan.*.arn)
@@ -91,16 +96,20 @@ data "aws_iam_policy_document" "main_scan" {
     resources = formatlist("%s/*", data.aws_s3_bucket.main_scan.*.arn)
   }
 
-  statement {
-    sid = "snsPublish"
+  // Only include permission to publish when SNS arns are provided
+  dynamic "statement" {
+    for_each = length(local.sns_arns) > 0 ? ["include_me"] : []
+    content {
+      sid = "snsPublish"
 
-    effect = "Allow"
+      effect = "Allow"
 
-    actions = [
-      "sns:Publish",
-    ]
+      actions = [
+        "sns:Publish",
+      ]
 
-    resources = compact([var.av_scan_start_sns_arn, var.av_status_sns_arn])
+      resources = local.sns_arns
+    }
   }
 }
 
@@ -181,6 +190,7 @@ resource "aws_lambda_function" "main_scan" {
       AV_STATUS_SNS_ARN              = var.av_status_sns_arn
       AV_STATUS_SNS_PUBLISH_CLEAN    = var.av_status_sns_publish_clean
       AV_STATUS_SNS_PUBLISH_INFECTED = var.av_status_sns_publish_infected
+      AV_DELETE_INFECTED_FILES       = var.av_delete_infected_files
     }
   }
 

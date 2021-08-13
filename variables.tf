@@ -75,6 +75,12 @@ variable "av_definition_s3_prefix" {
   default     = "clamav_defs"
 }
 
+variable "av_delete_infected_files" {
+  description = "Controls whether infected files should be automatically deleted"
+  type        = string
+  default     = "False"
+}
+
 variable "av_scan_start_sns_arn" {
   description = "SNS topic ARN to publish notification about start of scan (optional)."
   type        = string

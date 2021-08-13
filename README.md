@@ -90,6 +90,7 @@ module "s3_anti_virus" {
 |------|-------------|------|---------|:--------:|
 | av\_definition\_s3\_bucket | Bucket containing antivirus database files. | `string` | n/a | yes |
 | av\_definition\_s3\_prefix | Prefix for antivirus database files. | `string` | `"clamav_defs"` | no |
+| av\_delete\_infected\_files | Controls whether infected files should be automatically deleted | `string` | `"False"` | no |
 | av\_scan\_buckets | A list of S3 bucket names to scan for viruses. | `list(string)` | n/a | yes |
 | av\_scan\_start\_sns\_arn | SNS topic ARN to publish notification about start of scan (optional). | `string` | `""` | no |
 | av\_status\_sns\_arn | SNS topic ARN to publish scan results (optional). | `string` | `""` | no |
